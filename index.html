@@ -1,0 +1,1744 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="theme-color" content="#14140f">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Sport Life Tracker">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<title>Sport Life Tracker</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#14140f;
+    --surface:#201f1a;
+    --surface-alt:#2a2822;
+    --border:#3a3830;
+    --chalk:#ece7da;
+    --muted:#8f897a;
+    --iron:#c9432a;
+    --iron-dim:#7a2c1e;
+    --blue:#2f8fff;
+    --steel-dim:#3a5266;
+    --gold:#c9a13a;
+    --lime:#c3d94a;
+    --leafgreen:#4fb477;
+    --orange:#e08a3e;
+    --radius:10px;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--bg);color:var(--chalk);font-family:'Oswald', sans-serif;
+    min-height:100vh;-webkit-font-smoothing:antialiased;
+  }
+  h1,h2,h3,.display{font-family:'Oswald', sans-serif;text-transform:uppercase;letter-spacing:0.03em;font-weight:700;}
+  .wrap{max-width:640px;margin:0 auto;padding:16px 16px 90px;}
+
+  header{
+    display:flex;align-items:center;justify-content:space-between;padding:6px 2px 18px;
+    border-bottom:2px solid var(--border);margin-bottom:20px;
+  }
+  header h1{font-size:25px;font-weight:700;margin:0;color:var(--chalk);}
+  header h1 span{color:var(--iron);}
+  .unit-toggle{display:flex;background:var(--surface);border:1px solid var(--border);border-radius:999px;overflow:hidden;font-size:13px;}
+  .unit-toggle button{border:none;background:transparent;color:var(--muted);padding:7px 14px;cursor:pointer;font-family:inherit;font-weight:600;}
+  .unit-toggle button.active{background:var(--steel-dim);color:var(--chalk);}
+
+  .card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px;margin-bottom:16px;}
+  .card h2{
+    font-size:17px;color:var(--chalk);margin:0 0 12px;font-weight:600;
+    display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px;
+  }
+  .card h2 .sub{text-transform:none;font-weight:400;font-size:13px;color:var(--muted);letter-spacing:0;}
+
+  .muscle-chart{display:flex;justify-content:space-between;align-items:flex-end;gap:3px;padding:0 1px;}
+  .muscle-col{flex:1;min-width:0;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:124px;}
+  .muscle-col .count{font-weight:700;font-size:12.5px;color:var(--chalk);margin-bottom:7px;background:var(--surface-alt);border:1px solid var(--border);border-radius:999px;padding:2px 7px;}
+  .muscle-col.top .count{background:var(--iron);color:#fff;border-color:var(--iron-dim);}
+  .muscle-col .bar{width:62%;min-width:10px;border-radius:8px 8px 3px 3px;background:linear-gradient(180deg, var(--leafgreen) 0%, var(--steel-dim) 100%);border:1px solid var(--border);box-shadow:0 2px 8px rgba(79,180,119,0.25);transition:height 0.25s ease;}
+  .muscle-col.top .bar{background:linear-gradient(180deg, var(--gold) 0%, var(--iron) 100%);box-shadow:0 2px 10px rgba(201,67,42,0.35);border-color:var(--iron-dim);}
+  .muscle-col .lbl{font-size:10.5px;font-weight:700;color:var(--lime);margin-top:8px;text-align:center;line-height:1.15;word-break:break-word;overflow-wrap:break-word;width:100%;height:25px;overflow:hidden;}
+
+  .nav-cluster{display:flex;align-items:center;gap:6px;}
+  .nav-cluster button{
+    background:var(--surface-alt);border:1px solid var(--border);color:var(--chalk);
+    width:28px;height:28px;border-radius:6px;font-size:14px;cursor:pointer;font-family:inherit;
+    display:flex;align-items:center;justify-content:center;flex-shrink:0;
+  }
+  .nav-cluster button:disabled{color:var(--iron);opacity:0.85;cursor:not-allowed;border-color:var(--iron);}
+
+  .date-row{display:grid;grid-template-columns:44px 1fr 44px;gap:8px;margin-bottom:16px;}
+  .date-row button{
+    background:var(--surface-alt);border:1px solid var(--border);color:var(--chalk);
+    width:100%;height:44px;border-radius:8px;font-size:22px;cursor:pointer;font-family:inherit;
+    display:flex;align-items:center;justify-content:center;position:relative;z-index:2;
+  }
+  .date-row button:disabled{color:var(--iron);opacity:1;cursor:not-allowed;border-color:var(--iron);font-size:18px;background:rgba(201,67,42,0.12);}
+  .date-row input[type="date"]{
+    background:var(--surface-alt);border:1px solid var(--border);color:var(--chalk);
+    border-radius:8px;padding:11px 10px;font-family:inherit;font-size:16px;width:100%;min-width:0;
+  }
+  .today-flag{font-size:13px;color:var(--blue);margin-right:6px;text-transform:none;letter-spacing:0;}
+
+  .composer{border:1px solid var(--border);border-radius:8px;padding:12px;margin-bottom:16px;background:var(--surface-alt);}
+  .add-row{display:flex;gap:8px;margin-bottom:8px;}
+  input, select{
+    background:var(--bg);border:1px solid var(--border);color:var(--chalk);
+    border-radius:6px;padding:11px 10px;font-family:inherit;font-size:16px;width:100%;
+  }
+  input::placeholder{color:var(--muted);}
+  button.primary{
+    background:var(--iron);color:#fff;border:none;border-radius:6px;padding:11px 14px;
+    font-family:inherit;font-weight:600;letter-spacing:0.02em;cursor:pointer;white-space:nowrap;font-size:15px;
+  }
+  button.primary:hover{background:#e04f32;}
+
+  .quick-picks{display:flex;gap:6px;overflow-x:auto;padding-bottom:6px;margin-bottom:8px;}
+  .suggestion-dropdown{position:absolute;top:100%;right:0;left:0;background:var(--surface-alt);border:1px solid var(--border);border-radius:10px;margin-top:6px;max-height:190px;overflow-y:auto;z-index:30;box-shadow:0 6px 20px rgba(0,0,0,0.45);}
+  .suggestion-item{padding:11px 14px;font-size:14.5px;color:var(--chalk);cursor:pointer;border-bottom:1px solid var(--border);}
+  .suggestion-item:last-child{border-bottom:none;}
+  .suggestion-item:hover, .suggestion-item:active{background:var(--steel-dim);}
+  .quick-picks .lbl-inline{font-size:12.5px;color:var(--muted);flex-shrink:0;align-self:center;padding-left:2px;}
+  .quick-picks .chip{flex-shrink:0;}
+
+  .field-label{font-size:13px;color:var(--muted);margin:8px 0 6px;}
+
+  .chip-row{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:4px;}
+  .chip-unit{display:inline-flex;align-items:center;gap:5px;}
+  .chip{
+    font-size:14px;padding:7px 13px;border-radius:999px;border:1px solid var(--border);
+    background:var(--bg);color:var(--muted);cursor:pointer;user-select:none;font-family:inherit;white-space:nowrap;
+  }
+  .chip.muscle-chip{background:var(--iron);color:#fff;border-color:var(--iron-dim);}
+  .chip.muscle-chip.selected{background:var(--blue);color:#fff;border-color:var(--blue);}
+  .role-pill{font-size:11.5px;padding:5px 10px;border-radius:999px;border:1.5px solid;cursor:pointer;font-family:inherit;font-weight:700;white-space:nowrap;}
+  .role-agonist{background:var(--gold);color:#1a1408;border-color:var(--gold);}
+  .role-synergist{background:transparent;color:var(--chalk);border-color:var(--muted);}
+  .auto-note{font-size:12.5px;color:var(--blue);margin-top:6px;}
+
+  .exercise{border-top:1px solid var(--border);padding:14px 0;}
+  .exercise:first-of-type{border-top:none;padding-top:4px;}
+  .exercise-head{display:flex;justify-content:space-between;align-items:flex-start;gap:8px;}
+  .exercise-head .name-block{flex:1;min-width:0;}
+  .exercise-head .name{font-weight:700;font-size:18px;display:block;}
+  .exercise-head .collapsed-info{font-size:13px;color:var(--muted);margin-top:5px;}
+
+  .head-actions{display:flex;gap:6px;flex-shrink:0;flex-wrap:wrap;}
+  .btn-open, .btn-close, .btn-remove{
+    cursor:pointer;font-size:13px;font-family:inherit;border-radius:6px;padding:7px 12px;
+    white-space:nowrap;border:1.5px solid;font-weight:600;
+  }
+  .btn-open{color:var(--gold);background:transparent;border-color:var(--gold);}
+  .btn-open:hover{background:rgba(201,161,58,0.15);}
+  .btn-close{color:var(--blue);background:transparent;border-color:var(--blue);}
+  .btn-close:hover{background:rgba(47,143,255,0.15);}
+  .btn-remove{color:#fff;background:var(--iron);border-color:var(--iron-dim);}
+  .btn-remove:hover{background:#e04f32;}
+
+  .exercise-body{margin-top:10px;}
+  .notes-input{font-size:14.5px;margin-top:8px;padding:9px 10px;}
+
+  .set-row{display:grid;grid-template-columns:22px 1fr 1fr 30px auto;gap:6px;align-items:center;margin-bottom:8px;font-size:15px;margin-top:10px;}
+  .set-row .idx{color:var(--muted);text-align:center;font-size:14px;}
+  .set-row input{padding:8px 6px;font-size:14.5px;}
+  .set-row .del-set{color:var(--muted);background:none;border:none;cursor:pointer;font-size:17px;font-family:inherit;}
+  .set-row .del-set:hover{color:var(--iron);}
+  .set-type-btn{width:30px;height:34px;border-radius:6px;border:1px solid var(--border);background:var(--bg);color:var(--muted);font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;}
+  .set-type-btn.drop{background:var(--gold);color:#1a1408;border-color:var(--gold);}
+  .set-type-btn.super{background:var(--blue);color:#fff;border-color:var(--blue);}
+  .pr-badge{
+    display:inline-block;background:var(--gold);color:#1a1408;font-size:11px;font-weight:700;
+    padding:3px 7px;border-radius:4px;margin-right:6px;letter-spacing:0.03em;
+  }
+  .add-set-btn{font-size:14.5px;color:var(--blue);background:none;border:none;cursor:pointer;font-family:inherit;padding:6px 0;}
+  .add-set-btn:hover{color:var(--chalk);}
+
+  .empty{color:var(--muted);font-size:14px;text-align:center;padding:20px 0;}
+
+  .bw-warning{color:var(--iron);font-weight:700;font-size:13.5px;margin-bottom:12px;text-align:center;line-height:1.4;}
+
+  .bw-row{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-top:1px solid var(--border);font-size:14.5px;}
+  .bw-row:first-child{border-top:none;}
+  .bw-row .del-set{color:var(--muted);background:none;border:none;font-size:15px;cursor:pointer;font-family:inherit;}
+
+  .wsl-row{margin-bottom:14px;}
+  .wsl-head{display:flex;justify-content:space-between;font-size:13.5px;margin-bottom:4px;color:var(--muted);}
+  .wsl-head b{color:var(--chalk);font-size:15px;}
+  .wsl-bar-bg{background:var(--surface-alt);border-radius:4px;height:9px;overflow:hidden;}
+  .wsl-bar{background:var(--leafgreen);height:100%;border-radius:4px;}
+
+  .angle-block{border-top:1px solid var(--border);padding:12px 0;}
+  .angle-block:first-of-type{border-top:none;padding-top:2px;}
+  .angle-head{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;}
+  .angle-head .angle-name{font-weight:700;font-size:16px;}
+  .angle-head .angle-actions{display:flex;gap:6px;}
+  .angle-head .angle-actions .upload-btn{color:var(--blue);border-color:var(--blue);background:transparent;cursor:pointer;font-size:12.5px;font-family:inherit;border-radius:6px;padding:7px 12px;border-width:1.5px;border-style:solid;font-weight:600;}
+  .photo-strip{display:flex;gap:10px;overflow-x:auto;padding:10px 0 2px;}
+  .photo-thumb{flex-shrink:0;text-align:center;width:84px;}
+  .photo-thumb img{width:84px;height:104px;object-fit:cover;border-radius:8px;border:1px solid var(--border);display:block;}
+  .photo-thumb .date-lbl{font-size:11.5px;color:var(--muted);margin-top:5px;}
+  .photo-thumb .del-photo{font-size:11px;color:var(--muted);background:none;border:none;cursor:pointer;margin-top:2px;font-family:inherit;}
+
+  .muscle-hist-col{border:1px solid var(--border);border-radius:12px;padding:14px;margin-bottom:14px;background:var(--surface-alt);}
+  .muscle-hist-head{display:flex;align-items:center;gap:10px;}
+  .muscle-hist-icon{flex-shrink:0;width:40px;}
+  .muscle-hist-icon svg{width:40px;height:auto;display:block;}
+  .muscle-hist-title{flex:1;min-width:0;}
+  .mh-name{font-size:17px;font-weight:700;color:var(--chalk);}
+  .mh-count{font-size:12px;color:var(--muted);margin-top:2px;}
+  .muscle-hist-body{margin-top:14px;border-top:1px solid var(--border);padding-top:10px;}
+
+  .hist-item{border-top:1px solid var(--border);padding:12px 0;}
+  .hist-item:first-of-type{border-top:none;}
+  .hist-head{display:flex;justify-content:space-between;align-items:center;gap:8px;}
+  .hist-head .ex-name{font-weight:700;font-size:16px;}
+  .hist-body{margin-top:8px;}
+  .hist-entry{font-size:13.5px;color:var(--muted);padding:4px 0;}
+  .hist-entry b{color:var(--chalk);}
+  .hist-weight{color:var(--orange);font-weight:700;}
+  .hist-reps{color:#b3a99a;font-weight:600;}
+
+  .cal-square{background:var(--surface-alt);border:1px solid var(--border);border-radius:12px;padding:22px 16px;text-align:center;margin-bottom:14px;}
+  .cal-square .big-num{font-size:42px;font-weight:700;color:var(--chalk);line-height:1;}
+  .cal-square .big-num .tgt{color:var(--muted);font-size:24px;}
+  .cal-square .cal-label{font-size:13px;color:var(--muted);margin-top:6px;text-transform:uppercase;letter-spacing:0.05em;}
+  .bar-bg{background:var(--bg);border-radius:6px;height:10px;overflow:hidden;margin-top:12px;}
+  .bar-fill{background:var(--iron);height:100%;border-radius:6px;transition:width .3s ease;}
+  .macro-squares{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;}
+  .macro-square{background:var(--surface-alt);border:1px solid var(--border);border-radius:10px;padding:12px 6px;text-align:center;}
+  .macro-square .m-num{font-size:19px;font-weight:700;color:var(--chalk);}
+  .macro-square .m-target{color:var(--muted);font-size:12.5px;margin-top:2px;}
+  .macro-square .m-label{font-size:11.5px;color:var(--muted);margin-top:4px;}
+  .macro-square .bar-bg{height:6px;margin-top:8px;}
+  .macro-square .bar-fill{background:var(--blue);}
+  .mini-icon{display:inline-block;vertical-align:middle;margin-left:4px;width:15px;height:15px;}
+  .mini-icon svg{width:100%;height:100%;display:block;}
+
+  .food-entry{border-top:1px solid var(--border);padding:10px 0;}
+  .food-entry:first-child{border-top:none;}
+  .food-entry-head{display:flex;align-items:center;gap:8px;justify-content:space-between;}
+  .food-time{color:var(--muted);font-size:13px;flex-shrink:0;}
+  .food-entry-head b{font-size:15px;color:var(--chalk);flex:1;text-align:center;}
+  .food-text{font-size:14px;color:var(--chalk);margin-top:5px;}
+  .food-table-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;border-radius:8px;}
+  .food-table{width:100%;border-collapse:collapse;font-size:13px;min-width:480px;}
+  .food-table th{background:var(--surface-alt);color:var(--lime);font-weight:700;padding:9px 5px;border:1px solid var(--border);font-size:11.5px;text-align:center;white-space:nowrap;}
+  .food-table td{border:1px solid var(--border);padding:2px;text-align:center;background:var(--bg);}
+  .food-table input{width:100%;background:transparent;border:none;color:var(--chalk);text-align:center;font-size:13.5px;padding:9px 4px;font-family:inherit;}
+  .food-table input:focus{background:var(--surface-alt);outline:1px solid var(--blue);border-radius:4px;}
+  .food-name-cell{display:flex;align-items:center;gap:2px;}
+  .food-name-cell input{text-align:right;flex:1;}
+  .food-row-del{background:none;border:none;color:var(--muted);cursor:pointer;font-size:15px;flex-shrink:0;padding:0 4px;}
+  .food-row-del:hover{color:var(--iron);}
+  .food-warn{font-size:12px;color:var(--iron);margin-top:4px;}
+  .del-food{background:none;border:none;color:var(--muted);cursor:pointer;font-size:16px;font-family:inherit;flex-shrink:0;}
+
+  nav.bottom-nav{
+    position:fixed;bottom:0;left:0;right:0;background:var(--surface);border-top:1px solid var(--border);
+    display:flex;padding:6px 6px calc(6px + env(safe-area-inset-bottom));z-index:10;
+  }
+  nav.bottom-nav button{
+    flex:1;background:none;border:none;color:var(--muted);font-family:inherit;font-size:10.5px;
+    font-weight:600;letter-spacing:0.01em;text-transform:uppercase;padding:7px 2px 5px;cursor:pointer;border-radius:8px;
+  }
+  nav.bottom-nav button .icon{display:block;font-size:18px;margin-bottom:2px;}
+  nav.bottom-nav button.active{color:var(--chalk);background:var(--surface-alt);}
+
+  .tab-content{display:none;}
+  .tab-content.active{display:block;}
+  .placeholder-box{text-align:center;padding:60px 20px;color:var(--muted);}
+  .placeholder-box .big{font-size:16px;color:var(--chalk);margin-bottom:6px;font-weight:700;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <h1>מעקב <span>אימונים</span></h1>
+    <div class="unit-toggle" id="weight-unit-toggle">
+      <button id="unit-kg" class="active">ק"ג</button>
+      <button id="unit-lb">lb</button>
+    </div>
+    <div class="unit-toggle" id="macro-unit-toggle" style="display:none;">
+      <button id="macro-unit-cal" class="active">קלוריות</button>
+      <button id="macro-unit-mbp">מב"פ</button>
+    </div>
+  </header>
+
+  <!-- HOME TAB -->
+  <div id="tab-home" class="tab-content active">
+
+    <div class="card">
+      <h2>
+        <span>נפח שבועי</span>
+        <span class="nav-cluster">
+          <button id="chart-prev-week" title="שבוע קודם">‹</button>
+          <span class="sub" id="week-range"></span>
+          <button id="chart-next-week" title="שבוע הבא">›</button>
+        </span>
+      </h2>
+      <div class="muscle-chart" id="muscle-chart"></div>
+    </div>
+
+    <div class="card">
+      <h2>האימון בתאריך <span id="today-date"></span><span class="today-flag" id="today-flag"></span></h2>
+      <div class="date-row">
+        <button id="prev-day" title="יום קודם">‹</button>
+        <input type="date" id="date-picker">
+        <button id="next-day" title="יום הבא">›</button>
+      </div>
+
+      <div class="composer">
+        <div class="add-row" style="position:relative;">
+          <input type="text" id="new-exercise" placeholder="שם התרגיל (למשל: לחיצת חזה)" autocomplete="off">
+          <div id="exercise-suggestions" class="suggestion-dropdown" style="display:none;"></div>
+        </div>
+
+        <div class="quick-picks" id="quick-picks"></div>
+
+        <div class="field-label">שרירים (סמן, ובחר לכל אחד אם עיקרי או משני)</div>
+        <div class="chip-row" id="muscle-chip-row"></div>
+        <div id="auto-note" class="auto-note" style="display:none;">מולא אוטומטית לפי היסטוריה — אפשר לשנות</div>
+
+        <input type="text" id="new-exercise-notes" class="notes-input" placeholder="הערות (רשות)" style="margin-top:10px;">
+
+        <div style="margin-top:10px;">
+          <button class="primary" id="add-exercise-btn" style="width:100%;">הוסף תרגיל</button>
+        </div>
+      </div>
+
+      <div id="exercise-list"></div>
+      <div id="today-empty" class="empty"></div>
+    </div>
+
+  </div>
+
+  <!-- METRICS TAB -->
+  <div id="tab-metrics" class="tab-content">
+
+    <div class="card">
+      <h2>משקל גוף</h2>
+      <div class="bw-warning">יש לשקול רק בבוקר ללא אוכל ואחרי צרכים</div>
+      <div class="composer">
+        <div class="add-row">
+          <input type="date" id="bw-date">
+          <input type="number" inputmode="decimal" id="bw-weight" placeholder="משקל">
+        </div>
+        <button class="primary" id="bw-add-btn" style="width:100%;">הוסף מדידה</button>
+      </div>
+      <div id="bw-chart-container"></div>
+      <div id="bw-empty" class="empty">עוד לא הוספת מדידות משקל.</div>
+      <div id="bw-list"></div>
+    </div>
+
+    <div class="card">
+      <h2>תמונות התקדמות</h2>
+      <div id="photo-angles"></div>
+    </div>
+
+    <div class="card">
+      <h2>סטים שבועיים לאורך זמן</h2>
+      <div id="weekly-sets-list"></div>
+    </div>
+
+  </div>
+
+  <!-- CALORIES TAB -->
+  <div id="tab-calories" class="tab-content">
+
+    <div class="card">
+      <div class="cal-square">
+        <div class="big-num"><span id="cal-current">0</span><span class="tgt"> / <span id="cal-target">—</span></span></div>
+        <div class="cal-label"><span class="mini-icon">
+          <svg viewBox="0 0 24 24"><path d="M12 2c1 4-3 5-3 9a3 3 0 0 0 6 0c0-2-1-3-1-3s2 1 2 5a5 5 0 0 1-10 0c0-6 5-7 6-11z" fill="#c9432a"/></svg>
+        </span>קלוריות</div>
+        <div class="bar-bg"><div class="bar-fill" id="cal-bar" style="width:0%;"></div></div>
+      </div>
+      <div class="macro-squares">
+        <div class="macro-square">
+          <div class="m-num"><span id="fat-current">0</span></div>
+          <div class="m-target">/ <span id="fat-target">—</span> <span id="fat-unit">גרם</span></div>
+          <div class="m-label"><span class="mini-icon">
+            <svg viewBox="0 0 24 24"><ellipse cx="12" cy="12" rx="8" ry="10" fill="#7a9b3a"/><ellipse cx="12" cy="12" rx="5.3" ry="7.3" fill="#c9d98a"/><circle cx="12" cy="13" r="3" fill="#6b4a2a"/></svg>
+          </span>שומן</div>
+          <div class="bar-bg"><div class="bar-fill" id="fat-bar" style="width:0%;"></div></div>
+        </div>
+        <div class="macro-square">
+          <div class="m-num"><span id="protein-current">0</span></div>
+          <div class="m-target">/ <span id="protein-target">—</span> <span id="protein-unit">גרם</span></div>
+          <div class="m-label"><span class="mini-icon">
+            <svg viewBox="0 0 24 24"><ellipse cx="12" cy="13" rx="7.5" ry="9.5" fill="#ece7da"/><circle cx="12" cy="14" r="3.8" fill="#c9a13a"/></svg>
+          </span>חלבון</div>
+          <div class="bar-bg"><div class="bar-fill" id="protein-bar" style="width:0%;"></div></div>
+        </div>
+        <div class="macro-square">
+          <div class="m-num"><span id="carbs-current">0</span></div>
+          <div class="m-target">/ <span id="carbs-target">—</span> <span id="carbs-unit">גרם</span></div>
+          <div class="m-label"><span class="mini-icon">
+            <svg viewBox="0 0 24 24"><rect x="4" y="10" width="16" height="9" rx="3.5" fill="#c9a13a"/><path d="M5 10 Q12 2 19 10" fill="none" stroke="#8a6a2a" stroke-width="1.6"/></svg>
+          </span>פחמימות</div>
+          <div class="bar-bg"><div class="bar-fill" id="carbs-bar" style="width:0%;"></div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>יעדים יומיים</h2>
+      <div class="composer">
+        <div class="add-row">
+          <input type="number" inputmode="decimal" id="target-cal" placeholder="קלוריות">
+          <input type="number" inputmode="decimal" id="target-protein" placeholder="חלבון (גרם)">
+        </div>
+        <div class="add-row">
+          <input type="number" inputmode="decimal" id="target-carbs" placeholder="פחמימות (גרם)">
+          <input type="number" inputmode="decimal" id="target-fat" placeholder="שומן (גרם)">
+        </div>
+        <button class="primary" id="save-targets-btn" style="width:100%;">שמור יעדים</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>דיווח אוכל</h2>
+      <div class="field-label">אתה ממלא שם, גרם (לרפרנס שלך) ומב"פ בכל קטגוריה — האפליקציה ממירה אוטומטית לקלוריות.</div>
+      <div id="food-table-container"></div>
+    </div>
+
+  </div>
+
+  <!-- HISTORY TAB -->
+  <div id="tab-history" class="tab-content">
+    <div class="card">
+      <h2>היסטוריית תרגילים לפי שריר</h2>
+      <div id="history-empty" class="empty">עוד אין תרגילים בהיסטוריה.</div>
+      <div id="history-list"></div>
+    </div>
+  </div>
+
+</div>
+
+<nav class="bottom-nav">
+  <button class="nav-btn active" data-tab="home"><span class="icon">🏠</span>בית</button>
+  <button class="nav-btn" data-tab="metrics"><span class="icon">📊</span>מדדים</button>
+  <button class="nav-btn" data-tab="calories"><span class="icon">🍽️</span>קלוריות</button>
+  <button class="nav-btn" data-tab="history"><span class="icon">📜</span>היסטוריה</button>
+</nav>
+
+<script>
+const STORAGE_KEY = 'iron-log-data-v2';
+const KG_TO_LB = 2.20462;
+const round1 = (n) => Math.round(n*10)/10;
+
+const MUSCLES = [
+  {key:'chest', label:'חזה'},
+  {key:'back', label:'גב'},
+  {key:'triceps', label:'יד אחורית'},
+  {key:'biceps', label:'יד קדמית'},
+  {key:'shoulders', label:'כתפיים'},
+  {key:'rearDelt', label:'כתף אחורית'},
+  {key:'abs', label:'בטן'},
+  {key:'legs', label:'רגליים'}
+];
+const ANGLES = [
+  {key:'front', label:'חזית'},
+  {key:'side', label:'צד'},
+  {key:'back', label:'גב'}
+];
+
+// ---------- food database (approximate, per 100g — several items verified via web search) ----------
+const FOOD_DB = [
+  {keywords:['חזה עוף','עוף','פרגית','פרגיות'], cal:165, p:31, c:0, f:3.6},
+  {keywords:['חזה הודו','הודו'], cal:135, p:29, c:0, f:1.5},
+  {keywords:['אורז מלא'], cal:112, p:2.6, c:23, f:0.9},
+  {keywords:['אורז'], cal:130, p:2.7, c:28, f:0.3},
+  {keywords:['לחם מלא','לחם חום'], cal:247, p:13, c:41, f:3.4},
+  {keywords:['לחם לבן','לחם'], cal:265, p:9, c:49, f:3.2},
+  {keywords:['לחמניה'], cal:280, p:9, c:53, f:4},
+  {keywords:['ביצים','ביצה'], cal:155, p:13, c:1.1, f:11},
+  {keywords:['חלב שקדים','משקה שקדים'], cal:33, p:1.1, c:1.5, f:2.9},
+  {keywords:['חלב שיבולת שועל','משקה שיבולת שועל'], cal:40, p:0.5, c:6, f:1.5},
+  {keywords:['חלב 1%'], cal:42, p:3.4, c:5, f:1},
+  {keywords:['חלב'], cal:61, p:3.2, c:4.8, f:3.3},
+  {keywords:['אבקת חלבון'], cal:370, p:75, c:8, f:5},
+  {keywords:['משקה חלבון','שייק חלבון'], cal:60, p:10, c:3, f:0.5},
+  {keywords:['ברנפלקס','קורנפלקס'], cal:357, p:7, c:84, f:0.9},
+  {keywords:['בננה'], cal:89, p:1.1, c:23, f:0.3},
+  {keywords:['תפוח עץ','תפוח'], cal:52, p:0.3, c:14, f:0.2},
+  {keywords:['טונה'], cal:116, p:26, c:0, f:0.8},
+  {keywords:['סלמון מעושן'], cal:117, p:18, c:0, f:4.3},
+  {keywords:['פילה סלמון','סלמון'], cal:208, p:20, c:0, f:13},
+  {keywords:['בשר מספר 4','כתף מרכזית'], cal:260, p:19, c:0, f:19},
+  {keywords:['בשר מספר 5','צלי כתף'], cal:190, p:24, c:0, f:10},
+  {keywords:['בשר בקר רזה','שייטל','סינטה','פילה מיניון','וויסבארטן','אווזית'], cal:170, p:22, c:0, f:9},
+  {keywords:['בשר בקר','בקר טחון','בקר'], cal:250, p:26, c:0, f:15},
+  {keywords:['כבד עוף'], cal:119, p:17, c:0.7, f:4.8},
+  {keywords:['שווארמה הודו'], cal:180, p:25, c:2, f:8},
+  {keywords:['פסטרמה'], cal:110, p:20, c:1, f:3},
+  {keywords:['שוקיים'], cal:172, p:24, c:0, f:8},
+  {keywords:['כרעיים'], cal:209, p:26, c:0, f:11},
+  {keywords:['פסטה'], cal:131, p:5, c:25, f:1.1},
+  {keywords:['תפוח אדמה'], cal:87, p:1.9, c:20, f:0.1},
+  {keywords:['בטטה'], cal:86, p:1.6, c:20, f:0.1},
+  {keywords:['קוטג'], cal:97, p:11, c:3.4, f:4.3},
+  {keywords:['יוגורט'], cal:63, p:5.3, c:7.7, f:1.5},
+  {keywords:['יופלה'], cal:65, p:5, c:8, f:1},
+  {keywords:['מולייר'], cal:70, p:5, c:7, f:2},
+  {keywords:['דנונה לייט'], cal:55, p:5, c:6, f:1},
+  {keywords:['אבוקדו'], cal:160, p:2, c:8.5, f:14.7},
+  {keywords:['שמן זית'], cal:884, p:0, c:0, f:100},
+  {keywords:['חמאת בוטנים'], cal:588, p:25, c:20, f:50},
+  {keywords:['חמאת שקדים'], cal:614, p:21, c:19, f:56},
+  {keywords:['חמאת קשיו'], cal:587, p:18, c:28, f:49},
+  {keywords:['שקדים'], cal:579, p:21, c:6, f:50},
+  {keywords:['אגוזי מלך'], cal:654, p:15, c:14, f:65},
+  {keywords:['קשיו'], cal:553, p:18, c:30, f:44},
+  {keywords:['פקאן'], cal:691, p:9, c:14, f:72},
+  {keywords:['ברוקולי'], cal:34, p:2.8, c:7, f:0.4},
+  {keywords:['עגבנייה','עגבניה'], cal:18, p:0.9, c:3.9, f:0.2},
+  {keywords:['מלפפון'], cal:15, p:0.7, c:3.6, f:0.1},
+  {keywords:['חומוס'], cal:166, p:8, c:14, f:10},
+  {keywords:['טחינה'], cal:595, p:17, c:21, f:54},
+  {keywords:['פיתה'], cal:275, p:9, c:55, f:1.2},
+  {keywords:['עדשים'], cal:116, p:9, c:20, f:0.4},
+  {keywords:['קינואה'], cal:120, p:4.4, c:21, f:1.9},
+  {keywords:['גבינה צהובה 9%'], cal:201, p:30, c:0.5, f:9},
+  {keywords:['גבינה צהובה'], cal:250, p:26, c:1.5, f:15},
+  {keywords:['גבינה לבנה'], cal:101, p:8, c:3.5, f:6.5},
+  {keywords:['גבינה בולגרית'], cal:135, p:14, c:3, f:5},
+  {keywords:['גבינת שמנת','סימפוניה'], cal:100, p:8, c:4, f:5},
+  {keywords:['גבינה צפתית'], cal:110, p:14, c:3, f:5},
+  {keywords:['לאבנה'], cal:120, p:10, c:5, f:5},
+  {keywords:['טופו'], cal:76, p:8, c:1.9, f:4.8},
+  {keywords:['שיבולת שועל','קוואקר'], cal:389, p:16.9, c:66, f:6.9},
+  {keywords:['הליבוט'], cal:111, p:23, c:0, f:1.3},
+  {keywords:['אמנון','טילפיה'], cal:96, p:20, c:0, f:1.7},
+  {keywords:['נסיכת הנילוס'], cal:90, p:19, c:0, f:1.5},
+  {keywords:['לברק'], cal:97, p:18, c:0, f:2.6},
+  {keywords:['דג דניס','דניס'], cal:97, p:20, c:0, f:2},
+  {keywords:['בקלה'], cal:82, p:18, c:0, f:0.7},
+  {keywords:['פריכיות אורז'], cal:387, p:7, c:81, f:2.8},
+  {keywords:['כוסמין'], cal:380, p:9, c:75, f:5},
+  {keywords:['פריכיות פיטנס','פיטנס'], cal:380, p:8, c:74, f:5},
+  {keywords:['קרקר לחמית'], cal:400, p:9, c:70, f:8},
+  {keywords:['פצפוצי אורז'], cal:380, p:7, c:85, f:1},
+  {keywords:['חיטה מבושל'], cal:198, p:7.5, c:42, f:1},
+  {keywords:['פתיתים'], cal:160, p:5, c:33, f:0.5},
+  {keywords:['קוסקוס'], cal:112, p:3.8, c:23, f:0.2},
+  {keywords:['כוסמת'], cal:92, p:3.4, c:20, f:0.6},
+  {keywords:['בורגול'], cal:83, p:3.1, c:18.6, f:0.2},
+  {keywords:['גרנולה'], cal:471, p:10, c:64, f:20},
+  {keywords:['דפי אורז'], cal:330, p:0.6, c:82, f:0.2},
+  {keywords:['טורטייה'], cal:310, p:8, c:50, f:7.5},
+  {keywords:['זרעי צ׳יה','צ׳יה'], cal:486, p:17, c:42, f:31},
+  {keywords:['זרעי פשתן','פשתן'], cal:534, p:18, c:29, f:42},
+  {keywords:['שוקולד מריר'], cal:598, p:7.8, c:46, f:43},
+  {keywords:['חמאה'], cal:717, p:0.9, c:0.1, f:81},
+  {keywords:['שמנת'], cal:140, p:2.7, c:3.5, f:9},
+  {keywords:['זיתים'], cal:145, p:1, c:3.8, f:15},
+  {keywords:['חלב קוקוס'], cal:230, p:2.3, c:5.5, f:24},
+  {keywords:['קוקוס'], cal:354, p:3.3, c:15, f:33},
+  {keywords:['סילאן','דבש תמרים'], cal:306, p:2, c:73, f:0.6},
+  {keywords:['דבש'], cal:304, p:0.3, c:82, f:0},
+  {keywords:['תמר'], cal:277, p:1.8, c:75, f:0.2},
+  {keywords:['אפרסמון'], cal:70, p:0.6, c:18.6, f:0.2},
+  {keywords:['ענבים'], cal:69, p:0.7, c:18, f:0.2},
+  {keywords:['אבטיח'], cal:30, p:0.6, c:7.6, f:0.2},
+  {keywords:['תפוז'], cal:47, p:0.9, c:12, f:0.1},
+  {keywords:['אשכולית'], cal:42, p:0.8, c:11, f:0.1},
+  {keywords:['קלמנטינה'], cal:47, p:0.9, c:12, f:0.2},
+  {keywords:['מנגו'], cal:60, p:0.8, c:15, f:0.4},
+  {keywords:['אננס'], cal:50, p:0.5, c:13, f:0.1},
+  {keywords:['אגס'], cal:57, p:0.4, c:15, f:0.1},
+  {keywords:['אפרסק'], cal:39, p:0.9, c:10, f:0.3},
+  {keywords:['ליצ׳י','ליצי'], cal:66, p:0.8, c:17, f:0.4},
+  {keywords:['מלון'], cal:34, p:0.8, c:8.2, f:0.2},
+  {keywords:['משמש'], cal:48, p:1.4, c:11, f:0.4},
+  {keywords:['קיווי'], cal:61, p:1.1, c:15, f:0.5},
+  {keywords:['שזיף'], cal:46, p:0.7, c:11, f:0.3},
+  {keywords:['שסק'], cal:47, p:0.4, c:12, f:0.2},
+  {keywords:['תותים'], cal:32, p:0.7, c:7.7, f:0.3},
+  {keywords:['שניצל'], cal:250, p:16, c:14, f:14},
+  {keywords:['קציצות בשר','קציצה'], cal:220, p:16, c:6, f:14},
+  {keywords:['נקניקיות','נקניקיה'], cal:280, p:12, c:4, f:24},
+  {keywords:['נקניק','סלמי'], cal:300, p:16, c:2, f:26},
+  {keywords:['המבורגר','בורגר בקר'], cal:250, p:17, c:0, f:20},
+  {keywords:['סלט טחינה'], cal:280, p:7, c:12, f:24},
+  {keywords:['חציל'], cal:25, p:1, c:6, f:0.2},
+  {keywords:['קישוא'], cal:17, p:1.2, c:3.1, f:0.3},
+  {keywords:['פלפל'], cal:31, p:1, c:6, f:0.3},
+  {keywords:['בצל'], cal:40, p:1.1, c:9.3, f:0.1},
+  {keywords:['שום'], cal:149, p:6.4, c:33, f:0.5},
+  {keywords:['גזר'], cal:41, p:0.9, c:9.6, f:0.2},
+  {keywords:['כרובית'], cal:25, p:1.9, c:5, f:0.3},
+  {keywords:['תירס'], cal:96, p:3.4, c:21, f:1.5},
+  {keywords:['אפונה'], cal:81, p:5.4, c:14, f:0.4},
+  {keywords:['שעועית ירוקה'], cal:31, p:1.8, c:7, f:0.2},
+  {keywords:['שעועית לבנה'], cal:127, p:9, c:23, f:0.5},
+  {keywords:['שעועית שחורה'], cal:132, p:8.9, c:24, f:0.5},
+  {keywords:['פלאפל'], cal:333, p:13, c:32, f:18},
+  {keywords:['מלאווח'], cal:390, p:7, c:45, f:20},
+  {keywords:['ג׳חנון','גחנון'], cal:400, p:7, c:40, f:24},
+  {keywords:['בורקס'], cal:320, p:6, c:28, f:20},
+  {keywords:['קרואסון'], cal:406, p:8, c:45, f:21},
+  {keywords:['עוגיות'], cal:480, p:6, c:63, f:22},
+  {keywords:['שוקולד חלב'], cal:535, p:7.6, c:59, f:30},
+  {keywords:['חטיף אנרגיה','חטיף חלבון'], cal:380, p:20, c:40, f:15},
+  {keywords:['פופקורן'], cal:387, p:12, c:78, f:4.5},
+  {keywords:['צ׳יפס','טוגנים'], cal:312, p:3.4, c:41, f:15},
+  {keywords:['פיצה'], cal:266, p:11, c:33, f:10},
+  {keywords:['גבינת שמנת פילדלפיה','פילדלפיה'], cal:342, p:6, c:4, f:34},
+  {keywords:['פיסטוקים'], cal:562, p:20, c:28, f:45},
+  {keywords:['אגוזי לוז'], cal:628, p:15, c:17, f:61},
+  {keywords:['זרעי חמנייה','גרעיני חמנייה'], cal:584, p:21, c:20, f:51},
+  {keywords:['זרעי דלעת','גרעיני דלעת'], cal:559, p:30, c:11, f:49},
+  {keywords:['רסק עגבניות'], cal:82, p:4.3, c:19, f:0.5},
+  {keywords:['קטשופ'], cal:112, p:1.7, c:27, f:0.2},
+  {keywords:['מיונז'], cal:680, p:1, c:1, f:75},
+  {keywords:['חרדל'], cal:66, p:4, c:6, f:3.3},
+  {keywords:['רוטב סויה'], cal:53, p:8, c:5, f:0.1},
+  {keywords:['מיץ תפוזים'], cal:45, p:0.7, c:10, f:0.2},
+  {keywords:['בירה'], cal:43, p:0.5, c:3.6, f:0},
+  {keywords:['יין'], cal:83, p:0.1, c:2.6, f:0},
+  {keywords:['סייטן'], cal:370, p:75, c:14, f:2}
+];
+
+// ---------- timezone-safe date helpers ----------
+function toLocalISODate(d){
+  const y = d.getFullYear();
+  const m = String(d.getMonth()+1).padStart(2,'0');
+  const day = String(d.getDate()).padStart(2,'0');
+  return `${y}-${m}-${day}`;
+}
+function todayStr(){ return toLocalISODate(new Date()); }
+function fmtDayMonth(dateStr){
+  const d = new Date(dateStr+'T00:00:00');
+  return d.getDate() + '.' + (d.getMonth()+1);
+}
+function startOfWeek(dateStr){
+  const d = new Date(dateStr+'T00:00:00');
+  d.setDate(d.getDate() - d.getDay());
+  return toLocalISODate(d);
+}
+function endOfWeek(dateStr){
+  const d = new Date(startOfWeek(dateStr)+'T00:00:00');
+  d.setDate(d.getDate()+6);
+  return toLocalISODate(d);
+}
+function shiftDate(dateStr, days){
+  const d = new Date(dateStr+'T00:00:00');
+  d.setDate(d.getDate()+days);
+  return toLocalISODate(d);
+}
+function escapeHtml(str){
+  const d = document.createElement('div');
+  d.textContent = str;
+  return d.innerHTML;
+}
+
+// ---------- unified open/close/remove button helpers ----------
+function makeToggleBtn(isOpenState, onClick){
+  const btn = document.createElement('button');
+  btn.type = 'button';
+  btn.textContent = isOpenState ? 'סגור' : 'פתח';
+  btn.className = isOpenState ? 'btn-close' : 'btn-open';
+  btn.onclick = onClick;
+  return btn;
+}
+function makeRemoveBtn(onClick, label){
+  const btn = document.createElement('button');
+  btn.type = 'button';
+  btn.textContent = label || 'הסר';
+  btn.className = 'btn-remove';
+  btn.onclick = onClick;
+  return btn;
+}
+
+// ---------- anatomical body icon (original illustration, not copied from any source) ----------
+function bodyIconSVG(muscleKey){
+  const isBack = ['back','triceps','rearDelt'].includes(muscleKey);
+  const bf = '#3a3830', bs = '#8f897a';
+  let base = `
+    <circle cx="50" cy="18" r="13" fill="${bf}" stroke="${bs}" stroke-width="1.5"/>
+    <rect x="44" y="29" width="12" height="8" fill="${bf}"/>
+    <path d="M32 90 Q30 60 36 38 Q50 32 64 38 Q70 60 68 90 Q50 96 32 90 Z" fill="${bf}" stroke="${bs}" stroke-width="1.5"/>
+    <rect x="12" y="40" width="15" height="52" rx="7.5" fill="${bf}" stroke="${bs}" stroke-width="1.5"/>
+    <rect x="73" y="40" width="15" height="52" rx="7.5" fill="${bf}" stroke="${bs}" stroke-width="1.5"/>
+    <rect x="34" y="92" width="15" height="68" rx="7.5" fill="${bf}" stroke="${bs}" stroke-width="1.5"/>
+    <rect x="51" y="92" width="15" height="68" rx="7.5" fill="${bf}" stroke="${bs}" stroke-width="1.5"/>
+  `;
+  if(isBack){ base += `<line x1="50" y1="40" x2="50" y2="86" stroke="${bs}" stroke-width="1.5" stroke-dasharray="2,3"/>`; }
+  let hl = '';
+  const G = 'var(--gold)';
+  switch(muscleKey){
+    case 'chest':
+      hl = `<ellipse cx="41" cy="49" rx="9.5" ry="10.5" fill="${G}" opacity="0.9"/><ellipse cx="59" cy="49" rx="9.5" ry="10.5" fill="${G}" opacity="0.9"/>`;
+      break;
+    case 'back':
+      hl = `<path d="M36 40 Q50 35 64 40 L61 66 Q50 70 39 66 Z" fill="${G}" opacity="0.9"/>`;
+      break;
+    case 'triceps':
+      hl = `<ellipse cx="19.5" cy="60" rx="7" ry="16" fill="${G}" opacity="0.9"/><ellipse cx="80.5" cy="60" rx="7" ry="16" fill="${G}" opacity="0.9"/>`;
+      break;
+    case 'biceps':
+      hl = `<ellipse cx="19.5" cy="55" rx="7" ry="16" fill="${G}" opacity="0.9"/><ellipse cx="80.5" cy="55" rx="7" ry="16" fill="${G}" opacity="0.9"/>`;
+      break;
+    case 'shoulders':
+      hl = `<circle cx="19.5" cy="44" r="9" fill="${G}" opacity="0.9"/><circle cx="80.5" cy="44" r="9" fill="${G}" opacity="0.9"/>`;
+      break;
+    case 'rearDelt':
+      hl = `<circle cx="19.5" cy="44" r="9" fill="${G}" opacity="0.9"/><circle cx="80.5" cy="44" r="9" fill="${G}" opacity="0.9"/>`;
+      break;
+    case 'abs':
+      hl = `<rect x="39" y="63" width="22" height="24" rx="5" fill="${G}" opacity="0.9"/>
+            <line x1="50" y1="63" x2="50" y2="87" stroke="${bf}" stroke-width="1.2"/>
+            <line x1="39" y1="71" x2="61" y2="71" stroke="${bf}" stroke-width="1.2"/>
+            <line x1="39" y1="79" x2="61" y2="79" stroke="${bf}" stroke-width="1.2"/>`;
+      break;
+    case 'legs':
+      hl = `<rect x="34" y="95" width="15" height="40" rx="6" fill="${G}" opacity="0.9"/><rect x="51" y="95" width="15" height="40" rx="6" fill="${G}" opacity="0.9"/>`;
+      break;
+  }
+  return `<svg viewBox="0 0 100 170" xmlns="http://www.w3.org/2000/svg">${base}${hl}</svg>`;
+}
+
+function loadData(){
+  let d;
+  try{
+    const raw = localStorage.getItem(STORAGE_KEY);
+    d = raw ? JSON.parse(raw) : null;
+  }catch(e){ d = null; }
+  if(!d) d = { unit:'kg', macroUnit:'cal', sessions:{}, exerciseMuscleMap:{}, exerciseNotesMap:{}, bodyweightLog:[], progressPhotos:{}, nutritionTargets:{}, foodLog:{}, personalFoods:{} };
+  if(!d.sessions) d.sessions = {};
+  if(!d.exerciseMuscleMap) d.exerciseMuscleMap = {};
+  if(!d.exerciseNotesMap) d.exerciseNotesMap = {};
+  if(!d.bodyweightLog) d.bodyweightLog = [];
+  if(!d.progressPhotos) d.progressPhotos = {};
+  ANGLES.forEach(a => { if(!d.progressPhotos[a.key]) d.progressPhotos[a.key] = []; });
+  if(!d.nutritionTargets) d.nutritionTargets = {calories:null,protein:null,carbs:null,fat:null};
+  if(!d.foodLog) d.foodLog = {};
+  if(!d.personalFoods) d.personalFoods = {};
+  if(!d.unit) d.unit = 'kg';
+  if(!d.macroUnit) d.macroUnit = 'cal';
+
+  Object.keys(d.sessions).forEach(dateKey => {
+    (d.sessions[dateKey].exercises || []).forEach(ex => {
+      if(Array.isArray(ex.muscles)){
+        const obj = {}; ex.muscles.forEach(k => obj[k] = 1); ex.muscles = obj;
+      }
+      if(!ex.muscles) ex.muscles = {};
+      // normalize any old decimal multipliers to the nearest role value (1 = agonist, else 0.5 = synergist)
+      Object.keys(ex.muscles).forEach(k => { ex.muscles[k] = (ex.muscles[k] >= 1) ? 1 : 0.5; });
+      if(ex.notes === undefined) ex.notes = '';
+      if(ex.collapsed === undefined) ex.collapsed = false;
+      (ex.sets || []).forEach(s => {
+        if(s.weightKg === undefined){
+          s.weightKg = (s.weight !== undefined && s.weight !== '') ? parseFloat(s.weight) : '';
+          delete s.weight;
+        }
+      });
+    });
+  });
+  Object.keys(d.exerciseMuscleMap).forEach(k => {
+    if(Array.isArray(d.exerciseMuscleMap[k])){
+      const obj = {}; d.exerciseMuscleMap[k].forEach(mk => obj[mk] = 1); d.exerciseMuscleMap[k] = obj;
+    }
+    Object.keys(d.exerciseMuscleMap[k]).forEach(mk => { d.exerciseMuscleMap[k][mk] = (d.exerciseMuscleMap[k][mk] >= 1) ? 1 : 0.5; });
+  });
+  return d;
+}
+function saveData(){
+  try{
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+  }catch(e){
+    alert('שגיאת שמירה — ייתכן שהאחסון המקומי מלא. נסה למחוק תמונות ישנות ולנסות שוב.');
+  }
+}
+
+let data = loadData();
+const today = todayStr();
+const weekStart = startOfWeek(today);
+let selectedDate = today;
+let chartWeekStart = weekStart;
+let historyColCollapsed = {};
+let historyExCollapsed = {};
+let angleCollapsed = {front:true, side:true, back:true};
+
+function ensureSession(dateStr){
+  if(!data.sessions[dateStr]) data.sessions[dateStr] = { exercises: [] };
+  return data.sessions[dateStr];
+}
+ensureSession(today);
+
+let composerMuscles = {};
+let composerMbp = {};
+
+// ---------- set validity ----------
+function isSetComplete(s){
+  const wOk = s.weightKg !== '' && s.weightKg !== null && s.weightKg !== undefined && !isNaN(parseFloat(s.weightKg));
+  const rOk = s.reps !== '' && s.reps !== null && s.reps !== undefined && String(s.reps).trim() !== '' && !isNaN(parseFloat(s.reps));
+  return wOk && rOk;
+}
+
+// ---------- unit helpers ----------
+function toDisplayWeight(kgVal){
+  if(kgVal === '' || kgVal === undefined || kgVal === null || isNaN(kgVal)) return '';
+  return data.unit === 'lb' ? round1(kgVal * KG_TO_LB) : round1(kgVal);
+}
+function fromDisplayWeight(val){
+  if(val === '' || val === undefined || val === null) return '';
+  const v = parseFloat(val);
+  if(isNaN(v)) return '';
+  return data.unit === 'lb' ? v / KG_TO_LB : v;
+}
+function unitLabel(){ return data.unit === 'lb' ? 'lb' : 'ק"ג'; }
+
+// ---------- unit toggle ----------
+function refreshUnitUI(){
+  document.getElementById('unit-kg').classList.toggle('active', data.unit==='kg');
+  document.getElementById('unit-lb').classList.toggle('active', data.unit==='lb');
+}
+document.getElementById('unit-kg').onclick = () => { data.unit='kg'; saveData(); renderAll(); };
+document.getElementById('unit-lb').onclick = () => { data.unit='lb'; saveData(); renderAll(); };
+
+// ---------- macro/mbp unit toggle (calories tab) ----------
+const MBP_G = { protein:27, carbs:32, fat:16 };
+const MBP_KCAL = { 'חלבון':177, 'פחמימה':159, 'שומן':179 };
+const MBP_G_BY_CAT = { 'חלבון':27, 'פחמימה':32, 'שומן':16 };
+function personalFoodTotals(mbpObj){
+  let cal=0,p=0,c=0,f=0;
+  if(mbpObj['חלבון']){ cal += mbpObj['חלבון']*MBP_KCAL['חלבון']; p += mbpObj['חלבון']*MBP_G_BY_CAT['חלבון']; }
+  if(mbpObj['פחמימה']){ cal += mbpObj['פחמימה']*MBP_KCAL['פחמימה']; c += mbpObj['פחמימה']*MBP_G_BY_CAT['פחמימה']; }
+  if(mbpObj['שומן']){ cal += mbpObj['שומן']*MBP_KCAL['שומן']; f += mbpObj['שומן']*MBP_G_BY_CAT['שומן']; }
+  return { cal: Math.round(cal), p: round1(p), c: round1(c), f: round1(f) };
+}
+function buildMbpChipRow(container, mbpObj, opts){
+  container.innerHTML = '';
+  ['חלבון','פחמימה','שומן'].forEach(cat => {
+    const wrap = document.createElement('span');
+    wrap.className = 'chip-unit';
+    const selected = mbpObj.hasOwnProperty(cat);
+    const chip = document.createElement('button');
+    chip.type = 'button';
+    chip.className = 'chip muscle-chip' + (selected ? ' selected' : '');
+    chip.textContent = cat;
+    chip.onclick = () => opts.onToggle(cat);
+    wrap.appendChild(chip);
+    if(selected){
+      const isFull = mbpObj[cat] === 1;
+      const roleBtn = document.createElement('button');
+      roleBtn.type = 'button';
+      roleBtn.className = 'role-pill ' + (isFull ? 'role-agonist' : 'role-synergist');
+      roleBtn.textContent = isFull ? 'מלא (1)' : 'חצי (0.5)';
+      roleBtn.onclick = () => opts.onRoleToggle(cat);
+      wrap.appendChild(roleBtn);
+    }
+    container.appendChild(wrap);
+  });
+}
+function toDisplayMacro(key, grams){
+  if(grams===''||grams===undefined||grams===null||isNaN(grams)) return '';
+  return data.macroUnit==='mbp' ? round1(grams/MBP_G[key]) : round1(grams);
+}
+function fromDisplayMacro(key, val){
+  if(val===''||val===undefined||val===null) return '';
+  const v = parseFloat(val);
+  if(isNaN(v)) return '';
+  return data.macroUnit==='mbp' ? v*MBP_G[key] : v;
+}
+function macroUnitLabel(){ return data.macroUnit==='mbp' ? 'מב"פ' : 'גרם'; }
+function refreshMacroUnitUI(){
+  document.getElementById('macro-unit-cal').classList.toggle('active', data.macroUnit!=='mbp');
+  document.getElementById('macro-unit-mbp').classList.toggle('active', data.macroUnit==='mbp');
+}
+document.getElementById('macro-unit-cal').onclick = () => { data.macroUnit='cal'; saveData(); refreshMacroUnitUI(); renderNutrition(); };
+document.getElementById('macro-unit-mbp').onclick = () => { data.macroUnit='mbp'; saveData(); refreshMacroUnitUI(); renderNutrition(); };
+
+// ---------- bottom nav ----------
+document.querySelectorAll('.nav-btn').forEach(btn => {
+  btn.onclick = () => {
+    document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+    document.querySelectorAll('.tab-content').forEach(t=>t.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('tab-'+btn.dataset.tab).classList.add('active');
+    const isCalories = btn.dataset.tab === 'calories';
+    document.getElementById('weight-unit-toggle').style.display = isCalories ? 'none' : 'flex';
+    document.getElementById('macro-unit-toggle').style.display = isCalories ? 'flex' : 'none';
+  };
+});
+
+// ---------- day navigation (workout entry) ----------
+function updateDateNavUI(){
+  document.getElementById('today-date').textContent = fmtDayMonth(selectedDate);
+  document.getElementById('today-flag').textContent = selectedDate === today ? ' (היום)' : '';
+  const picker = document.getElementById('date-picker');
+  picker.value = selectedDate;
+  picker.max = today;
+  const prevBtn = document.getElementById('prev-day');
+  const nextBtn = document.getElementById('next-day');
+  const nextDisabled = (selectedDate >= today);
+  prevBtn.disabled = false;
+  nextBtn.disabled = nextDisabled;
+  prevBtn.textContent = '‹';
+  nextBtn.textContent = nextDisabled ? '🚫' : '›';
+}
+document.getElementById('prev-day').onclick = () => {
+  selectedDate = shiftDate(selectedDate, -1);
+  ensureSession(selectedDate); updateDateNavUI(); renderToday();
+};
+document.getElementById('next-day').onclick = () => {
+  const d = shiftDate(selectedDate, 1);
+  if(d <= today){ selectedDate = d; ensureSession(selectedDate); updateDateNavUI(); renderToday(); }
+};
+document.getElementById('date-picker').addEventListener('change', (e) => {
+  const v = e.target.value;
+  if(v <= today){ selectedDate = v; ensureSession(selectedDate); updateDateNavUI(); renderToday(); }
+  else { e.target.value = selectedDate; }
+});
+
+// ---------- week navigation (volume chart, view-only) ----------
+document.getElementById('chart-prev-week').onclick = () => { chartWeekStart = shiftDate(chartWeekStart, -7); renderMuscleChart(); };
+document.getElementById('chart-next-week').onclick = () => {
+  const nw = shiftDate(chartWeekStart, 7);
+  if(nw <= weekStart){ chartWeekStart = nw; renderMuscleChart(); }
+};
+
+// ---------- helpers ----------
+function allSessionDates(){ return Object.keys(data.sessions).sort(); }
+function normName(name){ return name.trim().toLowerCase(); }
+
+function weeklyMuscleSetCounts(wkStart){
+  const wkEnd = endOfWeek(wkStart);
+  const counts = {};
+  MUSCLES.forEach(m => counts[m.key] = 0);
+  allSessionDates().forEach(d => {
+    if(d < wkStart || d > wkEnd) return;
+    data.sessions[d].exercises.forEach(ex => {
+      const setCount = ex.sets.filter(isSetComplete).length;
+      Object.keys(ex.muscles || {}).forEach(mk => {
+        if(counts[mk] !== undefined) counts[mk] += setCount * (parseFloat(ex.muscles[mk]) || 0);
+      });
+    });
+  });
+  return counts;
+}
+
+function personalRecordVolume(exerciseName, excludeDate){
+  let max = 0;
+  allSessionDates().forEach(d => {
+    if(d===excludeDate) return;
+    data.sessions[d].exercises.forEach(ex => {
+      if(normName(ex.name) === normName(exerciseName)){
+        ex.sets.filter(isSetComplete).forEach(s => {
+          const vol = (parseFloat(s.weightKg)||0) * (parseFloat(s.reps)||0);
+          if(vol>max) max=vol;
+        });
+      }
+    });
+  });
+  return max;
+}
+
+function fmtCount(v){ return Number.isInteger(v) ? String(v) : (Math.round(v*10)/10).toString(); }
+
+function distinctExerciseNames(limit){
+  const seen = new Set();
+  const names = [];
+  const dates = allSessionDates().slice().reverse();
+  for(const d of dates){
+    for(const ex of data.sessions[d].exercises.slice().reverse()){
+      const key = normName(ex.name);
+      if(!seen.has(key) && ex.name.trim()){
+        seen.add(key);
+        names.push(ex.name);
+        if(limit && names.length >= limit) return names;
+      }
+    }
+  }
+  return names;
+}
+
+// ---------- muscle chart ----------
+function renderMuscleChart(){
+  const counts = weeklyMuscleSetCounts(chartWeekStart);
+  const PCT_PER_SET = 6;
+  const chart = document.getElementById('muscle-chart');
+  chart.innerHTML = '';
+  let topKey = null, topVal = 0;
+  MUSCLES.forEach(m => { if(counts[m.key] > topVal){ topVal = counts[m.key]; topKey = m.key; } });
+
+  MUSCLES.forEach(m => {
+    const val = counts[m.key];
+    const heightPct = val <= 0 ? 4 : Math.min(100, val * PCT_PER_SET);
+    const col = document.createElement('div');
+    col.className = 'muscle-col' + (val>0 && m.key===topKey ? ' top' : '');
+    col.innerHTML = `
+      <div class="count">${fmtCount(val)}</div>
+      <div class="bar" style="height:${heightPct}%;"></div>
+      <div class="lbl">${m.label}</div>
+    `;
+    chart.appendChild(col);
+  });
+
+  document.getElementById('week-range').textContent = 'מ-' + fmtDayMonth(chartWeekStart) + ' עד ' + fmtDayMonth(endOfWeek(chartWeekStart));
+  const nextDisabled = (chartWeekStart >= weekStart);
+  document.getElementById('chart-next-week').disabled = nextDisabled;
+  document.getElementById('chart-next-week').textContent = nextDisabled ? '🚫' : '›';
+  document.getElementById('chart-prev-week').textContent = '‹';
+}
+
+// ---------- muscle chip row (shared renderer) — role is agonist(1) or synergist(0.5), no free decimals ----------
+function buildMuscleChipRow(container, musclesObj, opts){
+  container.innerHTML = '';
+  MUSCLES.forEach(m => {
+    const wrap = document.createElement('span');
+    wrap.className = 'chip-unit';
+    const selected = musclesObj.hasOwnProperty(m.key);
+
+    const chip = document.createElement('button');
+    chip.type = 'button';
+    chip.className = 'chip muscle-chip' + (selected ? ' selected' : '');
+    chip.textContent = m.label;
+    chip.onclick = () => opts.onToggle(m.key);
+    wrap.appendChild(chip);
+
+    if(selected){
+      const isAgonist = musclesObj[m.key] === 1;
+      const roleBtn = document.createElement('button');
+      roleBtn.type = 'button';
+      roleBtn.className = 'role-pill ' + (isAgonist ? 'role-agonist' : 'role-synergist');
+      roleBtn.textContent = isAgonist ? 'עיקרי' : 'משני';
+      roleBtn.onclick = () => opts.onRoleToggle(m.key);
+      wrap.appendChild(roleBtn);
+    }
+    container.appendChild(wrap);
+  });
+}
+
+// ---------- composer ----------
+function renderComposerMuscleRow(){
+  const container = document.getElementById('muscle-chip-row');
+  buildMuscleChipRow(container, composerMuscles, {
+    onToggle: (key) => {
+      if(composerMuscles.hasOwnProperty(key)) delete composerMuscles[key];
+      else composerMuscles[key] = 1;
+      renderComposerMuscleRow();
+    },
+    onRoleToggle: (key) => {
+      composerMuscles[key] = (composerMuscles[key] === 1) ? 0.5 : 1;
+      renderComposerMuscleRow();
+    }
+  });
+}
+
+function applyAutoFillComposer(name){
+  const key = normName(name);
+  const mappedMuscles = data.exerciseMuscleMap[key];
+  const mappedNotes = data.exerciseNotesMap[key];
+  composerMuscles = mappedMuscles ? {...mappedMuscles} : {};
+  document.getElementById('new-exercise-notes').value = mappedNotes || '';
+  const hasAuto = !!(mappedMuscles && Object.keys(mappedMuscles).length) || !!mappedNotes;
+  document.getElementById('auto-note').style.display = hasAuto ? 'block' : 'none';
+  renderComposerMuscleRow();
+}
+
+function renderExerciseSuggestions(query){
+  const box = document.getElementById('exercise-suggestions');
+  const q = query.trim();
+  if(q.length < 3){ box.style.display = 'none'; box.innerHTML = ''; return; }
+  const matches = distinctExerciseNames().filter(name => name.startsWith(q));
+  if(!matches.length){ box.style.display = 'none'; box.innerHTML = ''; return; }
+  box.innerHTML = '';
+  matches.slice(0, 8).forEach(name => {
+    const item = document.createElement('div');
+    item.className = 'suggestion-item';
+    item.textContent = name;
+    item.onclick = () => {
+      const input = document.getElementById('new-exercise');
+      input.value = name;
+      applyAutoFillComposer(name);
+      box.style.display = 'none';
+      box.innerHTML = '';
+    };
+    box.appendChild(item);
+  });
+  box.style.display = 'block';
+}
+document.getElementById('new-exercise').addEventListener('input', (e) => { applyAutoFillComposer(e.target.value); renderExerciseSuggestions(e.target.value); });
+document.getElementById('new-exercise').addEventListener('keydown', (e) => { if(e.key === 'Enter') document.getElementById('add-exercise-btn').click(); });
+document.getElementById('new-exercise').addEventListener('blur', () => { setTimeout(() => { document.getElementById('exercise-suggestions').style.display = 'none'; }, 150); });
+
+function renderQuickPicks(){
+  const row = document.getElementById('quick-picks');
+  const names = distinctExerciseNames(8);
+  row.innerHTML = '';
+  if(!names.length) return;
+  const lbl = document.createElement('span');
+  lbl.className = 'lbl-inline';
+  lbl.textContent = 'אחרונים:';
+  row.appendChild(lbl);
+  names.forEach(name => {
+    const chip = document.createElement('button');
+    chip.type = 'button';
+    chip.className = 'chip';
+    chip.textContent = name;
+    chip.onclick = () => {
+      const input = document.getElementById('new-exercise');
+      input.value = name;
+      applyAutoFillComposer(name);
+      input.focus();
+    };
+    row.appendChild(chip);
+  });
+}
+
+document.getElementById('add-exercise-btn').onclick = () => {
+  const nameInput = document.getElementById('new-exercise');
+  const notesInput = document.getElementById('new-exercise-notes');
+  const name = nameInput.value.trim();
+  if(!name) return;
+  const muscles = {...composerMuscles};
+  const notes = notesInput.value.trim();
+
+  ensureSession(selectedDate).exercises.push({ name, muscles, notes, collapsed:false, sets:[{weightKg:'',reps:''}] });
+  data.exerciseMuscleMap[normName(name)] = {...muscles};
+  data.exerciseNotesMap[normName(name)] = notes;
+
+  nameInput.value = '';
+  notesInput.value = '';
+  composerMuscles = {};
+  document.getElementById('auto-note').style.display = 'none';
+  saveData();
+  renderComposerMuscleRow();
+  renderAll();
+};
+
+// ---------- session exercise list ----------
+function renderToday(){
+  const sess = ensureSession(selectedDate);
+  const list = document.getElementById('exercise-list');
+  const emptyMsg = document.getElementById('today-empty');
+  list.innerHTML = '';
+  emptyMsg.style.display = sess.exercises.length ? 'none' : 'block';
+  emptyMsg.textContent = selectedDate === today ? 'עדיין לא הוספת תרגילים היום. תתחיל!' : 'לא נרשמו תרגילים בתאריך הזה.';
+
+  sess.exercises.forEach((ex, exIdx) => {
+    const prVol = personalRecordVolume(ex.name, selectedDate);
+    const div = document.createElement('div');
+    div.className = 'exercise';
+
+    const head = document.createElement('div');
+    head.className = 'exercise-head';
+
+    const nameBlock = document.createElement('div');
+    nameBlock.className = 'name-block';
+    const nameEl = document.createElement('span');
+    nameEl.className = 'name';
+    nameEl.textContent = ex.name;
+    nameBlock.appendChild(nameEl);
+
+    if(ex.collapsed){
+      const completeCount = ex.sets.filter(isSetComplete).length;
+      const muscleLabels = Object.keys(ex.muscles||{}).map(k => (MUSCLES.find(m=>m.key===k)||{}).label).filter(Boolean).join(', ');
+      const info = document.createElement('div');
+      info.className = 'collapsed-info';
+      info.textContent = `${completeCount} סטים` + (muscleLabels ? ' · ' + muscleLabels : '');
+      nameBlock.appendChild(info);
+    }
+    head.appendChild(nameBlock);
+
+    const actions = document.createElement('div');
+    actions.className = 'head-actions';
+    actions.appendChild(makeToggleBtn(!ex.collapsed, () => { ex.collapsed = !ex.collapsed; saveData(); renderToday(); }));
+    actions.appendChild(makeRemoveBtn(() => { sess.exercises.splice(exIdx,1); saveData(); renderAll(); }));
+    head.appendChild(actions);
+
+    div.appendChild(head);
+
+    if(!ex.collapsed){
+      const body = document.createElement('div');
+      body.className = 'exercise-body';
+
+      const tagsEl = document.createElement('div');
+      tagsEl.className = 'chip-row';
+      buildMuscleChipRow(tagsEl, ex.muscles, {
+        onToggle: (key) => {
+          if(ex.muscles.hasOwnProperty(key)) delete ex.muscles[key];
+          else ex.muscles[key] = 1;
+          data.exerciseMuscleMap[normName(ex.name)] = {...ex.muscles};
+          saveData();
+          renderAll();
+        },
+        onRoleToggle: (key) => {
+          ex.muscles[key] = (ex.muscles[key] === 1) ? 0.5 : 1;
+          data.exerciseMuscleMap[normName(ex.name)] = {...ex.muscles};
+          saveData();
+          renderAll();
+        }
+      });
+      body.appendChild(tagsEl);
+
+      const notesInput = document.createElement('input');
+      notesInput.type = 'text';
+      notesInput.className = 'notes-input';
+      notesInput.placeholder = 'הערות (רשות)';
+      notesInput.value = ex.notes || '';
+      notesInput.oninput = () => {
+        ex.notes = notesInput.value;
+        data.exerciseNotesMap[normName(ex.name)] = ex.notes.trim();
+        saveData();
+      };
+      body.appendChild(notesInput);
+
+      ex.sets.forEach((s, setIdx) => {
+        const row = document.createElement('div');
+        row.className = 'set-row';
+        const wKg = parseFloat(s.weightKg) || 0;
+        const reps = parseFloat(s.reps) || 0;
+        const vol = wKg * reps;
+        const isPR = isSetComplete(s) && wKg > 0 && vol > prVol && prVol > 0;
+        if(s.setType === undefined) s.setType = 'normal';
+        row.innerHTML = `
+          <span class="idx">${setIdx+1}</span>
+          <input type="number" inputmode="decimal" placeholder="משקל (${unitLabel()})" value="${toDisplayWeight(s.weightKg)}">
+          <input type="number" inputmode="decimal" placeholder="חזרות" value="${s.reps}">
+          <button class="set-type-btn" type="button"></button>
+          <button class="del-set">✕</button>
+        `;
+        const [ , wInput, rInput, typeBtn, delSetBtn ] = row.children;
+        wInput.oninput = () => { s.weightKg = fromDisplayWeight(wInput.value); saveData(); renderMuscleChart(); };
+        rInput.oninput = () => { s.reps = rInput.value; saveData(); renderMuscleChart(); };
+        function refreshTypeBtn(){
+          const map = {normal:{label:'—',title:'סט רגיל',cls:''}, drop:{label:'D',title:'דרופ סט',cls:'drop'}, super:{label:'S',title:'סופר סט',cls:'super'}};
+          const m = map[s.setType] || map.normal;
+          typeBtn.textContent = m.label;
+          typeBtn.title = m.title;
+          typeBtn.className = 'set-type-btn' + (m.cls ? ' '+m.cls : '');
+        }
+        typeBtn.onclick = () => {
+          s.setType = s.setType === 'normal' ? 'drop' : (s.setType === 'drop' ? 'super' : 'normal');
+          saveData();
+          refreshTypeBtn();
+        };
+        refreshTypeBtn();
+        delSetBtn.onclick = () => { ex.sets.splice(setIdx,1); saveData(); renderAll(); };
+        if(isPR){
+          const badge = document.createElement('span');
+          badge.className='pr-badge';
+          badge.textContent='שיא';
+          row.children[1].insertAdjacentElement('afterend', badge);
+        }
+        body.appendChild(row);
+      });
+
+      const addSetBtn = document.createElement('button');
+      addSetBtn.className = 'add-set-btn';
+      addSetBtn.textContent = '+ הוסף סט';
+      addSetBtn.onclick = () => {
+        const lastSet = ex.sets[ex.sets.length-1];
+        if(lastSet && !isSetComplete(lastSet)){ alert('יש למלא את התבנית'); return; }
+        ex.sets.push({weightKg:'',reps:''});
+        saveData();
+        renderAll();
+      };
+      body.appendChild(addSetBtn);
+
+      div.appendChild(body);
+    }
+
+    list.appendChild(div);
+  });
+}
+
+// ---------- bodyweight ----------
+document.getElementById('bw-date').value = today;
+document.getElementById('bw-date').max = today;
+
+document.getElementById('bw-add-btn').onclick = () => {
+  const dateVal = document.getElementById('bw-date').value || today;
+  const wInput = document.getElementById('bw-weight');
+  const kgVal = fromDisplayWeight(wInput.value);
+  if(kgVal === '' || isNaN(kgVal)) return;
+  data.bodyweightLog = data.bodyweightLog.filter(e => e.date !== dateVal);
+  data.bodyweightLog.push({date: dateVal, weightKg: kgVal});
+  wInput.value = '';
+  saveData();
+  renderMetrics();
+};
+
+function renderBodyweightChart(){
+  const container = document.getElementById('bw-chart-container');
+  const emptyEl = document.getElementById('bw-empty');
+  const entries = data.bodyweightLog.slice().sort((a,b)=>a.date.localeCompare(b.date));
+  if(!entries.length){ container.innerHTML=''; emptyEl.style.display='block'; return; }
+  emptyEl.style.display='none';
+
+  const displayVals = entries.map(e => toDisplayWeight(e.weightKg));
+  const minV = Math.min(...displayVals), maxV = Math.max(...displayVals);
+  const pad = (maxV-minV)*0.2 || 2;
+  const yMin = minV-pad, yMax = maxV+pad;
+
+  const W=600, H=200, marginL=38, marginR=14, marginT=14, marginB=28;
+  const plotW = W-marginL-marginR, plotH = H-marginT-marginB;
+  const n = entries.length;
+  const xFor = (i) => n===1 ? marginL+plotW/2 : marginL + (i/(n-1))*plotW;
+  const yFor = (v) => marginT + plotH - ((v-yMin)/(yMax-yMin))*plotH;
+
+  let path = '';
+  entries.forEach((e,i)=>{
+    const x=xFor(i), y=yFor(displayVals[i]);
+    path += (i===0?'M':'L') + x.toFixed(1) + ',' + y.toFixed(1) + ' ';
+  });
+
+  let svg = `<svg viewBox="0 0 ${W} ${H}" style="width:100%;height:${H}px;">`;
+  [0,0.5,1].forEach(t=>{
+    const v = yMin + t*(yMax-yMin);
+    const y = yFor(v);
+    svg += `<line x1="${marginL}" y1="${y}" x2="${W-marginR}" y2="${y}" stroke="#3a3830" stroke-width="1" stroke-dasharray="3,3"/>`;
+    svg += `<text x="${marginL-6}" y="${y+4}" font-size="11" fill="#8f897a" text-anchor="end">${round1(v)}</text>`;
+  });
+  svg += `<path d="${path.trim()}" fill="none" stroke="#2f8fff" stroke-width="2.5"/>`;
+  entries.forEach((e,i)=>{
+    const x=xFor(i), y=yFor(displayVals[i]);
+    svg += `<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="4.5" fill="#2f8fff" stroke="#14140f" stroke-width="1.5"/>`;
+    const showLabel = n<=8 || i===0 || i===n-1 || i%Math.ceil(n/8)===0;
+    if(showLabel){
+      svg += `<text x="${x.toFixed(1)}" y="${H-marginB+16}" font-size="10.5" fill="#8f897a" text-anchor="middle">${fmtDayMonth(e.date)}</text>`;
+    }
+  });
+  svg += `</svg>`;
+  container.innerHTML = svg;
+}
+
+function renderBwList(){
+  const listEl = document.getElementById('bw-list');
+  const entries = data.bodyweightLog.slice().sort((a,b)=>b.date.localeCompare(a.date));
+  listEl.innerHTML = '';
+  entries.forEach(e => {
+    const row = document.createElement('div');
+    row.className = 'bw-row';
+    const span = document.createElement('span');
+    span.textContent = fmtDayMonth(e.date) + '  —  ' + toDisplayWeight(e.weightKg) + ' ' + unitLabel();
+    row.appendChild(span);
+    const delBtn = document.createElement('button');
+    delBtn.className = 'del-set';
+    delBtn.textContent = '✕';
+    delBtn.onclick = () => { data.bodyweightLog = data.bodyweightLog.filter(x=>x.date!==e.date); saveData(); renderMetrics(); };
+    row.appendChild(delBtn);
+    listEl.appendChild(row);
+  });
+}
+
+// ---------- progress photos ----------
+function resizeImageFile(file, maxDim, quality, callback){
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    const img = new Image();
+    img.onload = () => {
+      let w = img.width, h = img.height;
+      if(w > h){ if(w > maxDim){ h = Math.round(h*maxDim/w); w = maxDim; } }
+      else { if(h > maxDim){ w = Math.round(w*maxDim/h); h = maxDim; } }
+      const canvas = document.createElement('canvas');
+      canvas.width = w; canvas.height = h;
+      canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+      callback(canvas.toDataURL('image/jpeg', quality));
+    };
+    img.src = e.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+
+function renderPhotoAngles(){
+  const container = document.getElementById('photo-angles');
+  container.innerHTML = '';
+  ANGLES.forEach(angle => {
+    const block = document.createElement('div');
+    block.className = 'angle-block';
+
+    const head = document.createElement('div');
+    head.className = 'angle-head';
+    const nameEl = document.createElement('span');
+    nameEl.className = 'angle-name';
+    nameEl.textContent = angle.label;
+    head.appendChild(nameEl);
+
+    const actions = document.createElement('div');
+    actions.className = 'angle-actions';
+
+    const fileInput = document.createElement('input');
+    fileInput.type = 'file';
+    fileInput.accept = 'image/*';
+    fileInput.capture = 'environment';
+    fileInput.style.display = 'none';
+    fileInput.onchange = () => {
+      const file = fileInput.files[0];
+      if(!file) return;
+      resizeImageFile(file, 480, 0.72, (dataUrl) => {
+        data.progressPhotos[angle.key] = data.progressPhotos[angle.key].filter(p => p.date !== today);
+        data.progressPhotos[angle.key].push({date: today, img: dataUrl});
+        saveData();
+        angleCollapsed[angle.key] = false;
+        renderPhotoAngles();
+      });
+      fileInput.value = '';
+    };
+    head.appendChild(fileInput);
+
+    const uploadBtn = document.createElement('button');
+    uploadBtn.className = 'upload-btn';
+    uploadBtn.textContent = '+ הוסף תמונה';
+    uploadBtn.onclick = () => fileInput.click();
+    actions.appendChild(uploadBtn);
+    actions.appendChild(makeToggleBtn(!angleCollapsed[angle.key], () => { angleCollapsed[angle.key] = !angleCollapsed[angle.key]; renderPhotoAngles(); }));
+
+    head.appendChild(actions);
+    block.appendChild(head);
+
+    if(!angleCollapsed[angle.key]){
+      const photos = (data.progressPhotos[angle.key]||[]).slice().sort((a,b)=>a.date.localeCompare(b.date));
+      if(!photos.length){
+        const empty = document.createElement('div');
+        empty.className = 'empty';
+        empty.textContent = 'עוד אין תמונות בזווית הזו.';
+        block.appendChild(empty);
+      } else {
+        const strip = document.createElement('div');
+        strip.className = 'photo-strip';
+        photos.forEach(p => {
+          const thumb = document.createElement('div');
+          thumb.className = 'photo-thumb';
+          const img = document.createElement('img');
+          img.src = p.img;
+          thumb.appendChild(img);
+          const dateLbl = document.createElement('div');
+          dateLbl.className = 'date-lbl';
+          dateLbl.textContent = fmtDayMonth(p.date);
+          thumb.appendChild(dateLbl);
+          const delBtn = document.createElement('button');
+          delBtn.className = 'del-photo';
+          delBtn.textContent = 'הסר';
+          delBtn.onclick = () => {
+            data.progressPhotos[angle.key] = data.progressPhotos[angle.key].filter(x => x.date !== p.date);
+            saveData();
+            renderPhotoAngles();
+          };
+          thumb.appendChild(delBtn);
+          strip.appendChild(thumb);
+        });
+        block.appendChild(strip);
+      }
+    }
+
+    container.appendChild(block);
+  });
+}
+
+// ---------- weekly sets list ----------
+function computeWeeklyTotalSetsList(){
+  const map = {};
+  allSessionDates().forEach(d => {
+    const ws = startOfWeek(d);
+    const sess = data.sessions[d];
+    const completeCount = sess.exercises.reduce((sum,ex)=> sum + ex.sets.filter(isSetComplete).length, 0);
+    map[ws] = (map[ws]||0) + completeCount;
+  });
+  return Object.keys(map).sort().reverse().map(ws => ({weekStart:ws, weekEnd:endOfWeek(ws), total:map[ws]}));
+}
+
+function renderWeeklySetsList(){
+  const listEl = document.getElementById('weekly-sets-list');
+  const rows = computeWeeklyTotalSetsList();
+  listEl.innerHTML = '';
+  if(!rows.length){ listEl.innerHTML = '<div class="empty">עוד אין נתונים.</div>'; return; }
+  const maxTotal = Math.max(...rows.map(r=>r.total), 1);
+  rows.forEach(r => {
+    const pct = Math.round((r.total/maxTotal)*100);
+    const row = document.createElement('div');
+    row.className = 'wsl-row';
+    row.innerHTML = `
+      <div class="wsl-head"><span>${fmtDayMonth(r.weekStart)}–${fmtDayMonth(r.weekEnd)}</span><b>${r.total}</b></div>
+      <div class="wsl-bar-bg"><div class="wsl-bar" style="width:${pct}%;"></div></div>
+    `;
+    listEl.appendChild(row);
+  });
+}
+
+function renderMetrics(){
+  document.getElementById('bw-weight').placeholder = 'משקל (' + unitLabel() + ')';
+  renderBodyweightChart();
+  renderBwList();
+  renderPhotoAngles();
+  renderWeeklySetsList();
+}
+
+// ---------- history tab (grouped by primary/agonist muscle) ----------
+function getExerciseHistoryEntries(name){
+  const key = normName(name);
+  const entries = [];
+  allSessionDates().slice().reverse().forEach(d => {
+    data.sessions[d].exercises.forEach(ex => {
+      if(normName(ex.name) === key){
+        const completeSets = ex.sets.filter(isSetComplete);
+        if(completeSets.length) entries.push({date:d, sets:completeSets});
+      }
+    });
+  });
+  return entries;
+}
+
+function getAgonistMuscle(name){
+  const muscles = data.exerciseMuscleMap[normName(name)] || {};
+  for(const m of MUSCLES){ if(muscles[m.key] === 1) return m.key; }
+  let bestKey = null, bestVal = -1;
+  Object.keys(muscles).forEach(k => { if(muscles[k] > bestVal){ bestVal = muscles[k]; bestKey = k; } });
+  return bestKey;
+}
+
+function getExercisesByMuscle(){
+  const map = {}; MUSCLES.forEach(m => map[m.key] = []);
+  distinctExerciseNames().forEach(name => {
+    const key = getAgonistMuscle(name);
+    if(key && map[key]) map[key].push(name);
+  });
+  return map;
+}
+
+function renderHistoryList(){
+  const container = document.getElementById('history-list');
+  container.innerHTML = '';
+  const grouped = getExercisesByMuscle();
+  const anyExercises = distinctExerciseNames().length > 0;
+  document.getElementById('history-empty').style.display = anyExercises ? 'none' : 'block';
+
+  MUSCLES.forEach(m => {
+    const names = grouped[m.key];
+    const colKey = m.key;
+    if(historyColCollapsed[colKey] === undefined) historyColCollapsed[colKey] = true;
+
+    const block = document.createElement('div');
+    block.className = 'muscle-hist-col';
+
+    const head = document.createElement('div');
+    head.className = 'muscle-hist-head';
+    const iconWrap = document.createElement('div');
+    iconWrap.className = 'muscle-hist-icon';
+    iconWrap.innerHTML = bodyIconSVG(m.key);
+    head.appendChild(iconWrap);
+    const titleWrap = document.createElement('div');
+    titleWrap.className = 'muscle-hist-title';
+    titleWrap.innerHTML = `<div class="mh-name">${m.label}</div><div class="mh-count">${names.length} תרגילים</div>`;
+    head.appendChild(titleWrap);
+    head.appendChild(makeToggleBtn(!historyColCollapsed[colKey], () => { historyColCollapsed[colKey] = !historyColCollapsed[colKey]; renderHistoryList(); }));
+    block.appendChild(head);
+
+    if(!historyColCollapsed[colKey]){
+      const body = document.createElement('div');
+      body.className = 'muscle-hist-body';
+      if(!names.length){
+        body.innerHTML = '<div class="empty">עוד אין תרגילים עם השריר הזה כעיקרי.</div>';
+      } else {
+        names.forEach(name => {
+          const exKey = normName(name);
+          if(historyExCollapsed[exKey] === undefined) historyExCollapsed[exKey] = true;
+          const exBlock = document.createElement('div');
+          exBlock.className = 'hist-item';
+          const exHead = document.createElement('div');
+          exHead.className = 'hist-head';
+          const nameEl = document.createElement('span');
+          nameEl.className = 'ex-name';
+          nameEl.textContent = name;
+          exHead.appendChild(nameEl);
+          exHead.appendChild(makeToggleBtn(!historyExCollapsed[exKey], () => { historyExCollapsed[exKey] = !historyExCollapsed[exKey]; renderHistoryList(); }));
+          exBlock.appendChild(exHead);
+          if(!historyExCollapsed[exKey]){
+            const exBody = document.createElement('div');
+            exBody.className = 'hist-body';
+            const entries = getExerciseHistoryEntries(name);
+            if(!entries.length){
+              exBody.innerHTML = '<div class="hist-entry">אין עדיין סטים תקינים רשומים.</div>';
+            } else {
+              entries.forEach(entry => {
+                const line = document.createElement('div');
+                line.className = 'hist-entry';
+                const setsStr = entry.sets.map(s => `<span class="hist-weight">${toDisplayWeight(s.weightKg)}</span>×<span class="hist-reps">${s.reps}</span>`).join(', ');
+                line.innerHTML = `<b>${fmtDayMonth(entry.date)}</b> — ${setsStr} ${unitLabel()}`;
+                exBody.appendChild(line);
+              });
+            }
+            exBlock.appendChild(exBody);
+          }
+          body.appendChild(exBlock);
+        });
+      }
+      block.appendChild(body);
+    }
+    container.appendChild(block);
+  });
+}
+
+// ---------- nutrition / calories ----------
+function matchFood(text){
+  let best = null, bestLen = 0;
+  FOOD_DB.forEach(item => {
+    item.keywords.forEach(kw => {
+      if(text.indexOf(kw) !== -1 && kw.length > bestLen){
+        best = item; bestLen = kw.length;
+      }
+    });
+  });
+  return best;
+}
+
+function parseFoodPart(part){
+  const m = part.match(/^(\d+(?:\.\d+)?)\s*(גרם|גר['׳]?|ג['׳]?|מ"ל|מל|יחידה|יחידות|כוס|כוסות)?\s*(.*)$/);
+  let grams = 100, foodText = part.trim();
+  if(m && m[1]){
+    grams = parseFloat(m[1]);
+    foodText = (m[3]||'').trim();
+    if(!foodText) foodText = part.trim();
+  }
+  const item = matchFood(foodText);
+  if(!item) return {grams, foodText, matched:false, cal:0, p:0, c:0, f:0};
+  const factor = grams/100;
+  return {
+    grams, foodText, matched:true,
+    cal: Math.round(item.cal*factor),
+    p: Math.round(item.p*factor*10)/10,
+    c: Math.round(item.c*factor*10)/10,
+    f: Math.round(item.f*factor*10)/10
+  };
+}
+
+function parseFoodEntryText(text){
+  const parts = text.split(/\sו(?=\d)|,/).map(s=>s.trim()).filter(Boolean);
+  const results = parts.length ? parts.map(parseFoodPart) : [parseFoodPart(text)];
+  const totals = results.reduce((acc,r)=>{
+    acc.cal+=r.cal; acc.p+=r.p; acc.c+=r.c; acc.f+=r.f;
+    if(!r.matched) acc.unrecognized.push(r.foodText);
+    return acc;
+  }, {cal:0,p:0,c:0,f:0,unrecognized:[]});
+  return {results, totals};
+}
+
+document.getElementById('save-targets-btn').onclick = () => {
+  const cal = parseFloat(document.getElementById('target-cal').value);
+  const p = fromDisplayMacro('protein', document.getElementById('target-protein').value);
+  const c = fromDisplayMacro('carbs', document.getElementById('target-carbs').value);
+  const f = fromDisplayMacro('fat', document.getElementById('target-fat').value);
+  data.nutritionTargets = {
+    calories: isNaN(cal)?null:cal,
+    protein: (p===''||isNaN(p))?null:p,
+    carbs: (c===''||isNaN(c))?null:c,
+    fat: (f===''||isNaN(f))?null:f
+  };
+  saveData();
+  renderNutrition();
+};
+
+function updateMacroSquare(key, current, target){
+  document.getElementById(key+'-unit').textContent = macroUnitLabel();
+  document.getElementById(key+'-current').textContent = toDisplayMacro(key, current);
+  document.getElementById(key+'-target').textContent = (target !== null && target !== undefined && target !== '') ? toDisplayMacro(key, target) : '—';
+  const pct = target ? Math.min(100, Math.round((current/target)*100)) : 0;
+  document.getElementById(key+'-bar').style.width = pct+'%';
+}
+
+function computeFoodTableTotals(){
+  const entries = data.foodLog[today] || [];
+  let cal=0,p=0,c=0,f=0;
+  entries.forEach(e => {
+    const mc = parseFloat(e.mbpCarb)||0, mp = parseFloat(e.mbpProtein)||0, mf = parseFloat(e.mbpFat)||0;
+    cal += mc*MBP_KCAL['פחמימה'] + mp*MBP_KCAL['חלבון'] + mf*MBP_KCAL['שומן'];
+    c += mc*MBP_G_BY_CAT['פחמימה'];
+    p += mp*MBP_G_BY_CAT['חלבון'];
+    f += mf*MBP_G_BY_CAT['שומן'];
+  });
+  return {cal:Math.round(cal), p:round1(p), c:round1(c), f:round1(f)};
+}
+
+function renderNutritionSummary(){
+  const totals = computeFoodTableTotals();
+  const t = data.nutritionTargets || {};
+  document.getElementById('cal-current').textContent = totals.cal;
+  document.getElementById('cal-target').textContent = t.calories ? Math.round(t.calories) : '—';
+  const calPct = t.calories ? Math.min(100, Math.round((totals.cal/t.calories)*100)) : 0;
+  document.getElementById('cal-bar').style.width = calPct+'%';
+
+  updateMacroSquare('protein', totals.p, t.protein);
+  updateMacroSquare('carbs', totals.c, t.carbs);
+  updateMacroSquare('fat', totals.f, t.fat);
+
+  document.getElementById('target-cal').value = t.calories ?? '';
+  document.getElementById('target-protein').value = t.protein!=null ? toDisplayMacro('protein', t.protein) : '';
+  document.getElementById('target-carbs').value = t.carbs!=null ? toDisplayMacro('carbs', t.carbs) : '';
+  document.getElementById('target-fat').value = t.fat!=null ? toDisplayMacro('fat', t.fat) : '';
+  document.getElementById('target-protein').placeholder = 'חלבון (' + macroUnitLabel() + ')';
+  document.getElementById('target-carbs').placeholder = 'פחמימות (' + macroUnitLabel() + ')';
+  document.getElementById('target-fat').placeholder = 'שומן (' + macroUnitLabel() + ')';
+}
+
+function renderFoodTable(){
+  const container = document.getElementById('food-table-container');
+  const entries = data.foodLog[today] || [];
+  container.innerHTML = `<div class="food-table-wrap"><table class="food-table"><thead><tr>
+      <th>שם פריט מזון</th><th>גרם/יחידת מזון</th><th>מב"פ פחמימה</th><th>מב"פ חלבון</th><th>מב"פ שומן</th>
+    </tr></thead><tbody id="food-table-body"></tbody></table></div>
+    <button class="add-set-btn" id="food-add-row-btn" style="margin-top:10px;">+ הוסף שורה</button>`;
+  const tbody = document.getElementById('food-table-body');
+  entries.forEach((entry, idx) => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td><div class="food-name-cell"><button class="food-row-del">✕</button><input type="text" value="${escapeHtml(entry.name||'')}"></div></td>
+      <td><input type="number" inputmode="decimal" value="${entry.grams ?? ''}"></td>
+      <td><input type="number" inputmode="decimal" step="0.5" value="${entry.mbpCarb ?? ''}"></td>
+      <td><input type="number" inputmode="decimal" step="0.5" value="${entry.mbpProtein ?? ''}"></td>
+      <td><input type="number" inputmode="decimal" step="0.5" value="${entry.mbpFat ?? ''}"></td>
+    `;
+    const nameInput = tr.querySelector('.food-name-cell input');
+    const numInputs = tr.querySelectorAll('td:not(:first-child) input');
+    nameInput.oninput = () => { entry.name = nameInput.value; saveData(); };
+    numInputs[0].oninput = () => { entry.grams = numInputs[0].value; saveData(); };
+    numInputs[1].oninput = () => { entry.mbpCarb = numInputs[1].value; saveData(); renderNutritionSummary(); };
+    numInputs[2].oninput = () => { entry.mbpProtein = numInputs[2].value; saveData(); renderNutritionSummary(); };
+    numInputs[3].oninput = () => { entry.mbpFat = numInputs[3].value; saveData(); renderNutritionSummary(); };
+    tr.querySelector('.food-row-del').onclick = () => {
+      entries.splice(idx,1);
+      saveData();
+      renderFoodTable();
+      renderNutritionSummary();
+    };
+    tbody.appendChild(tr);
+  });
+  document.getElementById('food-add-row-btn').onclick = () => {
+    if(!data.foodLog[today]) data.foodLog[today] = [];
+    data.foodLog[today].push({name:'', grams:'', mbpCarb:'', mbpProtein:'', mbpFat:''});
+    saveData();
+    renderFoodTable();
+  };
+}
+
+function renderNutrition(){
+  renderNutritionSummary();
+  renderFoodTable();
+}
+
+function renderAll(){
+  refreshUnitUI();
+  refreshMacroUnitUI();
+  renderMuscleChart();
+  renderComposerMuscleRow();
+  renderQuickPicks();
+  updateDateNavUI();
+  renderToday();
+  renderMetrics();
+  renderNutrition();
+  renderHistoryList();
+}
+renderAll();
+</script>
+</body>
+</html>
